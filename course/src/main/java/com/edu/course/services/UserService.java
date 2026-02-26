@@ -12,6 +12,8 @@ import com.edu.course.repositories.UserRepository;
 import com.edu.course.services.exception.DatabaseException;
 import com.edu.course.services.exception.ResourceNotFoundException;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class UserService  {
 	
@@ -37,7 +39,6 @@ public class UserService  {
 	    		repository.deleteById(id);
 	    	}else {
 	    		throw new ResourceNotFoundException(id);
-
 	    	}
 	    } 
 	    catch(DataIntegrityViolationException e){
@@ -46,9 +47,14 @@ public class UserService  {
 	}
 	
 	public User update(Long id, User obj) {
-		User entity = repository.getReferenceById(id);
-		updateData(entity, obj);
-		return repository.save(entity);
+		try {
+			User entity = repository.getReferenceById(id);
+			updateData(entity, obj);
+			return repository.save(entity);
+		} catch(EntityNotFoundException e) {
+			throw new ResourceNotFoundException(id);
+		}
+		
 	}
 
 	private void updateData(User entity, User obj) {
